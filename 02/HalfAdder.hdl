@@ -11,5 +11,9 @@ CHIP HalfAdder {
         carry;  // Left bit of a + b
 
     PARTS:
-    //// Replace this comment with your code.
+    Nand(a=a, b=b, out=nandAB);
+    Nand(a=a, b=nandAB, out=nandA);
+    Nand(a=nandAB, b=b, out=nandB);
+    Nand(a=nandA, b=nandB, out=sum);
+    Not(in=nandAB, out=carry);
 }
