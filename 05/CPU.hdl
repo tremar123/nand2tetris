@@ -33,33 +33,33 @@ CHIP CPU {
 
     /**
         instruction - https://www.nand2tetris.org/_files/ugd/44046b_7ef1c00a714c46768f08c459a6cab45a.pdf
-        bit 0 - A or C instruction
-        bits 3..9 - comp
-        bits 10..12 - dest 
-        bits 13..15 - jump
+        bit 15 - A or C instruction
+        bits 12..6 - comp
+        bits 5..3 - dest 
+        bits 2..0 - jump
     */
 
     PARTS:
-    Mux16(a=instruction, b=ALUout, sel=loadA, out=mux1out);
+    Mux16(a=instruction, b=ALUout, sel=destA, out=mux1out);
     ARegister(in=mux1out, load=loadA, out=outA, out[0..14]=addressM);
-    Mux16(a=inM, b=outA, sel=instruction[3], out=mux2out);
-    PC(in=outA, load=, inc=true, reset=reset, out[0..14]=pc);
-    ALU(x=Dout, y=mux2out, zx=instruction[4], nx=instruction[5], zy=instruction[6], ny=instruction[7], f=instruction[8], no=instruction[9], out=outM, out=ALUout, zr=zr, ng=ng);
-    DRegister(in=ALUout, load=loadD, out=Dout);
+    Mux16(a=outA, b=inM, sel=instruction[12], out=mux2out);
+    PC(in=outA, load=loadPC, inc=true, reset=reset, out[0..14]=pc);
+    ALU(x=Dout, y=mux2out, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=outM, out=ALUout, zr=zr, ng=ng);
+    DRegister(in=ALUout, load=destD, out=Dout);
 
     // whether to write to A register
-    Not(in=instruction[0], out=isAInst);
-    Or(a=isAInst, b=instruction[10], out=loadA);
+    And(a=instruction[15], b=instruction[5], out=destA);
+    Not(in=instruction[15], out=isAInst);
+    Or(a=destA, b=isAInst, out=loadA);
 
     // whether to write to D register
-    Not(in=instruction[10], out=notDDest);
-    Not(in=notDDest, out=loadD);
+    And(a=instruction[15], b=instruction[4], out=destD);
 
     // whether to write to memory
-    Not(in=instruction[12], out=notMemDest);
-    Not(in=notMemDest, out=writeM);
+    And(a=instruction[15], b=instruction[3], out=writeM);
 
     /**
+        only when c instruction
         |      PC load truth table      |
         | j1 | j2 | j3 | zr | ng | load |
         |----|----|----|----|----|------|
@@ -88,4 +88,13 @@ CHIP CPU {
         |  1 |  1 |  1 |  0 |  1 |    1 |
         |  1 |  1 |  1 |  1 |  0 |    1 |
     */
+
+    And(a=instruction[2], b=ng, out=jlt);
+    And(a=instruction[1], b=zr, out=jeq);
+    Or(a=zr, b=ng, out=notPositive);
+    Not(in=notPositive, out=positive);
+    And(a=instruction[0], b=positive, out=jgt);
+    Or(a=jgt, b=jeq, out=jge);
+    Or(a=jge, b=jlt, out=jmp);
+    And(a=instruction[15], b=jmp, out=loadPC);
 }
