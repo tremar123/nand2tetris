@@ -1,0 +1,45 @@
+/* double linked list to represent snake */
+class Node {
+    field Node prev;
+    field Node next;
+    field int x,y;
+
+    constructor Node new(int newX, int newY, Node prev, Node next) {
+        let x = newX;
+        let y = newY;
+        let prev = prev;
+        let next = next;
+        return this;
+    }
+
+    method int getX() {
+        return x;
+    }
+
+    method int getY() {
+        return y;
+    }
+
+    method Node getNext() {
+        return next;
+    }
+
+    method Node getPrev() {
+        return prev;
+    }
+
+    method void setNext(Node node) {
+        let next = node;
+        return;
+    }
+
+    method void setPrev(Node node) {
+        let prev = node;
+        return;
+    }
+
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+}

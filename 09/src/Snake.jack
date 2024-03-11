@@ -1,0 +1,136 @@
+class Snake {
+    field Node head;
+    field Node tail;
+    field int size;
+
+    constructor Snake new() {
+        let head = Node.new(15, 7, null, null);
+        let tail = head;
+        let size = 1;
+        do draw();
+        return this;
+    }
+
+    /* draw snake head */
+    method void draw() {
+        var int memAddress;
+        let memAddress = Utils.memLocationFromCoords(head.getX(), head.getY());
+        do Memory.poke(memAddress+0, -1);
+        do Memory.poke(memAddress+32, -1);
+        do Memory.poke(memAddress+64, -1);
+        do Memory.poke(memAddress+96, -1);
+        do Memory.poke(memAddress+128, -1);
+        do Memory.poke(memAddress+160, -1);
+        do Memory.poke(memAddress+192, -1);
+        do Memory.poke(memAddress+224, -1);
+        do Memory.poke(memAddress+256, -1);
+        do Memory.poke(memAddress+288, -1);
+        do Memory.poke(memAddress+320, -1);
+        do Memory.poke(memAddress+352, -1);
+        do Memory.poke(memAddress+384, -1);
+        do Memory.poke(memAddress+416, -1);
+        do Memory.poke(memAddress+448, -1);
+        do Memory.poke(memAddress+480, -1);
+        return;
+    }
+
+    /* returns true if snake is colliding with self or wall */
+    method bool checkCollision(int newX, int newY) {
+        var Node node;
+
+        if (newX < 0) {
+            return true;
+        }
+        if (newX > 31) {
+            return true;
+        }
+        if (newY < 0) {
+            return true;
+        }
+        if (newY > 16) {
+            return true;
+        }
+
+        let node = head;
+        // BUG: checking collision with self does not work
+        while (~(node = null)) {
+            if (node.getX() = newX & node.getY() = newY) {
+                return true;
+            }
+
+            let node = node.getNext();
+        }
+
+        return false;
+    }
+
+    /* add head to snake in direction of dir and increases snake if apple was eaten, return wheter it is colliding with self or wall */
+    method bool move(int dir, bool increaseSnake) {
+        var int newX, newY;
+        var Node newHead, tmpTail;
+        let newX = head.getX();
+        let newY = head.getY();
+
+        // 1 - top, 2 - right, 3 - down, 4 - left
+        if (dir = 1) {
+            let newY = newY - 1;
+        }
+        if (dir = 2) {
+            let newX = newX + 1;
+        }
+        if (dir = 3) {
+            let newY = newY + 1;
+        }
+        if (dir = 4) {
+            let newX = newX - 1;
+        }
+
+        if (checkCollision(newX, newY)) {
+            return true;
+        }
+
+        // prepend new head and draw it
+        let newHead = Node.new(newX, newY, null, head);
+        do head.setPrev(newHead);
+        let head = newHead;
+        do draw();
+
+        // if increase snake we dont do anything to the tail
+        if (increaseSnake) {
+            let size = size + 1;
+            return false;
+        }
+
+        // else we remove tail
+        do Utils.eraseBox(tail.getX(), tail.getY());
+        let tmpTail = tail;
+        let tail = tail.getPrev();
+        do tail.setNext(null);
+        do tmpTail.dispose();
+
+        return false;
+    }
+
+    method int getHeadX() {
+        return head.getX();
+    }
+
+    method int getHeadY() {
+        return head.getY();
+    }
+
+    method int getSize() {
+        return size;
+    }
+
+    method void dispose() {
+        var Node tmpNode;
+        while (~(head = null)) {
+            let tmpNode = head;
+            let head = head.getNext();
+            do tmpNode.dispose();
+        }
+        do Memory.deAlloc(this);
+        return;
+    }
+}

@@ -1,0 +1,64 @@
+class Game {
+    field Apple apple;
+    field Snake snake;
+    field int dir; // direction of snake 1 - top, 2 - right, 3 - down, 4 - left
+
+    constructor Game new() {
+        let apple = Apple.new();
+        let snake = Snake.new();
+        let dir = 2;
+        return this;
+    }
+
+    method void play() {
+        var int key;
+        var bool colliding, increase;
+
+        let colliding = false;
+        let increase = false;
+        // TODO: game loop
+        // check keyboard input for direction - if none keep prev direction
+        while (~colliding) {
+            let key = Keyboard.keyPressed();
+            if (key = 130 & ~(dir = 2)) {
+                let dir = 4;
+            }
+            if (key = 131 & ~(dir = 3)) {
+                let dir = 1;
+            }
+            if (key = 132 & ~(dir = 4)) {
+                let dir = 2;
+            }
+            if (key = 133 & ~(dir = 1)) {
+                let dir = 3;
+            }
+
+            // move snake & check if colliding with self or wall - lost
+            let colliding = snake.move(dir, increase);
+            let increase = false;
+
+            // check if on apple - make snake bigger, spawn next apple
+            if (snake.getHeadX() = apple.getX() & snake.getHeadY() = apple.getY()) {
+                let increase = true;
+                do apple.spawnNext();
+            }
+
+            // check if snake lenght equals to board size - win
+            if (snake.getSize() = 512) {
+                do Output.printString("You won!");
+                return;
+            }
+
+            do Sys.wait(300);
+        }
+        // after game ends write on screen win / lost and give option to play again
+        return;
+    }
+
+    method void dispose() {
+        do apple.dispose();
+        do snake.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+}

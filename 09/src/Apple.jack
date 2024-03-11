@@ -1,0 +1,54 @@
+class Apple {
+    field int x,y;
+
+    constructor Apple new() {
+        let x = Random.randRange(31);
+        let y = Random.randRange(16);
+        do draw();
+        return this;
+    }
+
+    /* draw apple in location */
+    method void draw() {
+        var int memAddress;
+        let memAddress = Utils.memLocationFromCoords(x, y);
+        do Memory.poke(memAddress+0, 256);
+        do Memory.poke(memAddress+32, 128);
+        do Memory.poke(memAddress+64, 7296);
+        do Memory.poke(memAddress+96, 8888);
+        do Memory.poke(memAddress+128, 16836);
+        do Memory.poke(memAddress+160, 16386);
+        do Memory.poke(memAddress+192, -32766);
+        do Memory.poke(memAddress+224, -32767);
+        do Memory.poke(memAddress+256, -32767);
+        do Memory.poke(memAddress+288, 16385);
+        do Memory.poke(memAddress+320, 16386);
+        do Memory.poke(memAddress+352, 16386);
+        do Memory.poke(memAddress+384, 8196);
+        do Memory.poke(memAddress+416, 8196);
+        do Memory.poke(memAddress+448, 4872);
+        do Memory.poke(memAddress+480, 3312);
+        return;
+    }
+
+    /* erase apple and draw apple on next coordinates */
+    method void spawnNext() {
+        let x = Random.randRange(31);
+        let y = Random.randRange(16);
+        do draw();
+        return;
+    }
+
+    method int getX() {
+        return x;
+    }
+
+    method int getY() {
+        return y;
+    }
+
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+}
