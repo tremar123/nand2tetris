@@ -12,12 +12,12 @@ class Game {
 
     method void play() {
         var int key;
-        var bool colliding, increase;
+        var bool colliding, increase, eraseTail;
 
         let colliding = false;
         let increase = false;
-        // TODO: game loop
-        // check keyboard input for direction - if none keep prev direction
+        let eraseTail = true;
+
         while (~colliding) {
             let key = Keyboard.keyPressed();
             if (key = 130 & ~(dir = 2)) {
@@ -33,8 +33,13 @@ class Game {
                 let dir = 3;
             }
 
+            if (snake.getTailX() = apple.getX() & snake.getTailY() = apple.getY()) {
+                let eraseTail = false;
+            }
+
             // move snake & check if colliding with self or wall - lost
-            let colliding = snake.move(dir, increase);
+            let colliding = snake.move(dir, increase, eraseTail);
+            let eraseTail = true;
             let increase = false;
 
             // check if on apple - make snake bigger, spawn next apple
@@ -46,12 +51,15 @@ class Game {
             // check if snake lenght equals to board size - win
             if (snake.getSize() = 512) {
                 do Output.printString("You won!");
+                do Output.println();
                 return;
             }
 
             do Sys.wait(300);
         }
-        // after game ends write on screen win / lost and give option to play again
+
+        do Output.printString("You lost!");
+        do Output.println();
         return;
     }
 

@@ -65,7 +65,7 @@ class Snake {
     }
 
     /* add head to snake in direction of dir and increases snake if apple was eaten, return wheter it is colliding with self or wall */
-    method bool move(int dir, bool increaseSnake) {
+    method bool move(int dir, bool increaseSnake, bool eraseTail) {
         var int newX, newY;
         var Node newHead, tmpTail;
         let newX = head.getX();
@@ -102,7 +102,9 @@ class Snake {
         }
 
         // else we remove tail
-        do Utils.eraseBox(tail.getX(), tail.getY());
+        if (eraseTail = true) {
+            do Utils.eraseBox(tail.getX(), tail.getY());
+        }
         let tmpTail = tail;
         let tail = tail.getPrev();
         do tail.setNext(null);
@@ -117,6 +119,14 @@ class Snake {
 
     method int getHeadY() {
         return head.getY();
+    }
+
+    method int getTailX() {
+        return tail.getX();
+    }
+
+    method int getTailY() {
+        return tail.getY();
     }
 
     method int getSize() {

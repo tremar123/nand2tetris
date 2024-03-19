@@ -305,12 +305,20 @@ pop this 2
 push constant 0
 return
 label IF_FALSE5
+push argument 3
+push constant 0
+not
+eq
+if-goto IF_TRUE6
+goto IF_FALSE6
+label IF_TRUE6
 push this 1
 call Node.getX 1
 push this 1
 call Node.getY 1
 call Utils.eraseBox 2
 pop temp 0
+label IF_FALSE6
 push this 1
 pop local 3
 push this 1
@@ -335,6 +343,18 @@ function Snake.getHeadY 0
 push argument 0
 pop pointer 0
 push this 0
+call Node.getY 1
+return
+function Snake.getTailX 0
+push argument 0
+pop pointer 0
+push this 1
+call Node.getX 1
+return
+function Snake.getTailY 0
+push argument 0
+pop pointer 0
+push this 1
 call Node.getY 1
 return
 function Snake.getSize 0

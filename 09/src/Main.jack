@@ -1,9 +1,35 @@
 class Main {
     function void main() {
         var Game game;
-        let game = Game.new();
-        do game.play();
-        do game.dispose();
+        var int key;
+
+        do Output.printString("Press any key to play!");
+
+        while (key = 0) {
+            let key = Keyboard.keyPressed();
+        }
+
+        do Output.moveCursor(0, 0);
+
+        while (~(key = 140)) {
+            do Screen.clearScreen();
+            let key = 0;
+            let game = Game.new();
+            do game.play();
+            do game.dispose();
+
+            do Output.printString("Press ESC to exit.");
+            do Output.println();
+            do Output.printString("Press any key to play again!");
+
+            // if user is holding key they have time to release
+            do Sys.wait(500);
+            while (key = 0) {
+                let key = Keyboard.keyPressed();
+            }
+            do Output.moveCursor(0, 0);
+        }
+
         return;
     }
 }
