@@ -52,7 +52,7 @@ class Snake {
         }
 
         let node = head;
-        // BUG: checking collision with self does not work
+
         while (~(node = null)) {
             if (node.getX() = newX & node.getY() = newY) {
                 return true;
@@ -105,10 +105,11 @@ class Snake {
         if (eraseTail = true) {
             do Utils.eraseBox(tail.getX(), tail.getY());
         }
-        let tmpTail = tail;
-        let tail = tail.getPrev();
+
+        let tmpTail = tail.getPrev();
+        do tail.dispose();
+        let tail = tmpTail;
         do tail.setNext(null);
-        do tmpTail.dispose();
 
         return false;
     }

@@ -320,16 +320,16 @@ call Utils.eraseBox 2
 pop temp 0
 label IF_FALSE6
 push this 1
+call Node.getPrev 1
 pop local 3
 push this 1
-call Node.getPrev 1
+call Node.dispose 1
+pop temp 0
+push local 3
 pop this 1
 push this 1
 push constant 0
 call Node.setNext 2
-pop temp 0
-push local 3
-call Node.dispose 1
 pop temp 0
 push constant 0
 return

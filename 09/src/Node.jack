@@ -4,11 +4,11 @@ class Node {
     field Node next;
     field int x,y;
 
-    constructor Node new(int newX, int newY, Node prev, Node next) {
+    constructor Node new(int newX, int newY, Node prevNode, Node nextNode) {
         let x = newX;
         let y = newY;
-        let prev = prev;
-        let next = next;
+        let prev = prevNode;
+        let next = nextNode;
         return this;
     }
 

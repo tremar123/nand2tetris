@@ -7,9 +7,9 @@ pop this 2
 push argument 1
 pop this 3
 push argument 2
-pop argument 2
+pop this 0
 push argument 3
-pop argument 3
+pop this 1
 push pointer 0
 return
 function Node.getX 0
