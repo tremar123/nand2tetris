@@ -57,27 +57,45 @@ func main() {
 }
 
 func compile(filename string) {
-	tokens := tokenizer(filename)
+	next := tokenizer(filename)
 
-	for _, token := range tokens {
+	xml := "<tokens>\n"
+	for token := next(); token != nil; token = next() {
 		var typ string
+		var value string
+
 		switch token.typ {
-        case 1:
-            typ = "KEYWORD"
-        case 2:
-            typ = "SYMBOL"
-        case 3:
-            typ = "INTEGER_CONSTANT"
-        case 4:
-            typ = "STRING_CONSTANT"
-        case 5:
-            typ = "IDENTIFIER"
+		case 1:
+			typ = "keyword"
+		case 2:
+			typ = "symbol"
+		case 3:
+			typ = "integerConstant"
+		case 4:
+			typ = "stringConstant"
+		case 5:
+			typ = "identifier"
 		}
-		fmt.Printf("%s - %q\n", typ, token.value)
+
+		r := strings.NewReplacer("<", "&lt;", ">", "&gt;", "\"", "&quot;", "&", "&amp;")
+		value = r.Replace(token.value)
+
+		xml += fmt.Sprintf("<%s> %s </%s>\n", typ, value, typ)
+	}
+	xml += "</tokens>"
+
+	newFileName := strings.TrimSuffix(filename, ".jack")
+	newFileName += "Tokens.xml"
+
+	err := os.WriteFile(newFileName, []byte(xml), 0600)
+	if err != nil {
+		fmt.Println(err.Error())
 	}
 }
 
-func tokenizer(filename string) []Token {
+// Returns `next` function that returns pointer to next token
+// or `nil` if there are no more tokens.
+func tokenizer(filename string) func() *Token {
 	code, err := os.ReadFile(filename)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -146,7 +164,6 @@ func tokenizer(filename string) []Token {
 			if strings.HasPrefix(currentToken, "\"") {
 				inString = true
 				if strings.HasSuffix(currentToken, "\"") && len(currentToken) > 1 && currentToken[len(currentToken)-2] != '\\' {
-					// TODO: here maybe strip '"'
 					str := strings.TrimPrefix(currentToken, "\"")
 					str = strings.TrimSuffix(str, "\"")
 					tokens = append(tokens, Token{typ: STRING_CONSTANT, value: str})
@@ -174,5 +191,14 @@ func tokenizer(filename string) []Token {
 		}
 	}
 
-	return tokens
+	i := -1
+	return func() *Token {
+        i++
+
+		if i > len(tokens)-1 {
+			return nil
+		}
+
+		return &tokens[i]
+	}
 }
