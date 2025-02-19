@@ -1,204 +1,117 @@
 package main
 
-import (
-	"fmt"
-	"os"
-	"path/filepath"
-	"strconv"
-	"strings"
-	"unicode"
-)
-
-const (
-	KEYWORD = iota + 1
-	SYMBOL
-	INTEGER_CONSTANT
-	STRING_CONSTANT
-	IDENTIFIER
-)
-
-// comment type
-const (
-	C_NONE = iota + 1
-	C_ONE_LINE
-	C_MULTI_LINE
-)
-
 type Token struct {
 	typ   int
 	value string
 }
 
-func main() {
-	info, err := os.Stat(os.Args[1])
-	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
-	}
-
-	if info.IsDir() {
-		dir, err := os.ReadDir(os.Args[1])
-		if err != nil {
-			fmt.Println(err.Error())
-			os.Exit(1)
-		}
-
-		for _, file := range dir {
-			nameAndExtension := strings.Split(file.Name(), ".")
-			if nameAndExtension[1] != "jack" {
-				continue
-			}
-			compile(filepath.Join(os.Args[1], file.Name()))
-		}
-
-	} else {
-		compile(os.Args[1])
-	}
+type Compiler struct {
+	nextToken func() *Token
+    varNames map[string]string // className -> varName
+    classNames []string // classNames
+    subroutineNames map[string]string // className -> subroutineName
+    xmlOutput string
 }
 
-func compile(filename string) {
-	next := tokenizer(filename)
-
-	xml := "<tokens>\n"
-	for token := next(); token != nil; token = next() {
-		var typ string
-		var value string
-
-		switch token.typ {
-		case 1:
-			typ = "keyword"
-		case 2:
-			typ = "symbol"
-		case 3:
-			typ = "integerConstant"
-		case 4:
-			typ = "stringConstant"
-		case 5:
-			typ = "identifier"
-		}
-
-		r := strings.NewReplacer("<", "&lt;", ">", "&gt;", "\"", "&quot;", "&", "&amp;")
-		value = r.Replace(token.value)
-
-		xml += fmt.Sprintf("<%s> %s </%s>\n", typ, value, typ)
-	}
-	xml += "</tokens>"
-
-	newFileName := strings.TrimSuffix(filename, ".jack")
-	newFileName += "Tokens.xml"
-
-	err := os.WriteFile(newFileName, []byte(xml), 0600)
-	if err != nil {
-		fmt.Println(err.Error())
-	}
+func newCompiler(next func() *Token) Compiler {
+	return Compiler{nextToken: next}
 }
 
-// Returns `next` function that returns pointer to next token
-// or `nil` if there are no more tokens.
-func tokenizer(filename string) func() *Token {
-	code, err := os.ReadFile(filename)
-	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
-	}
+func (c* Compiler) class() {
+    if c.nextToken().value == "class" {
+        // TODO: identifier, add to slice
+        // {
+        // var decs
+        // subroutine decs
+        // }
+    }
+    panic("not implemented!")
+}
 
-	inString := false
-	comment := C_NONE
-	tokens := []Token{}
-	currentToken := ""
+func (c* Compiler) classVarDec() {
+    panic("not implemented!")
+}
 
-	for i, ch := range string(code) {
-		if comment != C_NONE {
-			if comment == C_ONE_LINE && ch == '\n' {
-				comment = C_NONE
-			} else { // C_MULTI_LINE
-				if currentToken == "*" {
-					if ch == '/' {
-						comment = C_NONE
-						currentToken = ""
-						continue
-					} else {
-						currentToken = ""
-					}
-				}
+func (c* Compiler) typ() {
+    panic("not implemented!")
+}
 
-				if ch == '*' {
-					currentToken += "*"
-				}
-			}
-			continue
-		}
+func (c* Compiler) subroutineDec() {
+    panic("not implemented!")
+}
 
-		if unicode.IsControl(ch) {
-			continue
-		}
+func (c* Compiler) parameterList() {
+    panic("not implemented!")
+}
 
-		// never touch this
-		if (ch != ' ' && inString == false) || (ch != ' ' && inString == true) || (ch == ' ' && inString == true) {
-			currentToken += string(ch)
-		}
+func (c* Compiler) subroutineBody() {
+    panic("not implemented!")
+}
 
-		switch currentToken {
-		case "/":
-			if code[i+1] == '/' {
-				comment = C_ONE_LINE
-				currentToken = ""
-			} else if code[i+1] == '*' {
-				comment = C_MULTI_LINE
-				currentToken = ""
-			} else {
-				tokens = append(tokens, Token{typ: SYMBOL, value: currentToken})
-				currentToken = ""
-			}
-			// keywords
-		case "class", "method", "field", "constructor", "do", "let", "function", "static", "var", "boolean", "int", "char", "void", "return", "this", "null", "true", "false", "if", "else", "while":
-			if !unicode.IsLetter(rune(code[i+1])) && !unicode.IsDigit(rune(code[i+1])) {
-				tokens = append(tokens, Token{typ: KEYWORD, value: currentToken})
-				currentToken = ""
-			}
-		case "(", ")", "{", "}", "[", "]", ",", ".", ";", "=", "+", "-", "*", "&", "|", "~", ">", "<":
-			tokens = append(tokens, Token{typ: SYMBOL, value: currentToken})
-			currentToken = ""
-		default:
-			// check if current token is string literal, if there is '\' fount before '"' we are not at the end
-			if strings.HasPrefix(currentToken, "\"") {
-				inString = true
-				if strings.HasSuffix(currentToken, "\"") && len(currentToken) > 1 && currentToken[len(currentToken)-2] != '\\' {
-					str := strings.TrimPrefix(currentToken, "\"")
-					str = strings.TrimSuffix(str, "\"")
-					tokens = append(tokens, Token{typ: STRING_CONSTANT, value: str})
-					currentToken = ""
-					inString = false
-					continue
-				}
-				continue
-			}
+func (c* Compiler) varDev() {
+    panic("not implemented!")
+}
 
-			// should be identifier or integer constant after this
-			if !unicode.IsLetter(rune(code[i+1])) && !unicode.IsDigit(rune(code[i+1])) && len(currentToken) > 0 {
-				integer, err := strconv.Atoi(currentToken)
+func (c* Compiler) className() {
+    panic("not implemented!")
+}
 
-				if err != nil {
-					// not integer, it's a identifier
-					tokens = append(tokens, Token{typ: IDENTIFIER, value: currentToken})
-					currentToken = ""
-					continue
-				}
+func (c* Compiler) subroutineName() {
+    panic("not implemented!")
+}
 
-				tokens = append(tokens, Token{typ: INTEGER_CONSTANT, value: fmt.Sprint(integer)})
-				currentToken = ""
-			}
-		}
-	}
+func (c* Compiler) varName() {
+    panic("not implemented!")
+}
 
-	i := -1
-	return func() *Token {
-        i++
+func (c* Compiler) statement() {
+    panic("not implemented!")
+}
 
-		if i > len(tokens)-1 {
-			return nil
-		}
+func (c* Compiler) letStatement() {
+    panic("not implemented!")
+}
 
-		return &tokens[i]
-	}
+func (c* Compiler) ifStatement() {
+    panic("not implemented!")
+}
+
+func (c* Compiler) whileStatement() {
+    panic("not implemented!")
+}
+
+func (c* Compiler) doStatement() {
+    panic("not implemented!")
+}
+
+func (c* Compiler) returnStatement() {
+    panic("not implemented!")
+}
+
+func (c* Compiler) expression() {
+    panic("not implemented!")
+}
+
+func (c* Compiler) term() {
+    panic("not implemented!")
+}
+
+func (c* Compiler) subroutineCall() {
+    panic("not implemented!")
+}
+
+func (c* Compiler) expressionList() {
+    panic("not implemented!")
+}
+
+func (c* Compiler) op() {
+    panic("not implemented!")
+}
+
+func (c* Compiler) unaryOp() {
+    panic("not implemented!")
+}
+
+func (c* Compiler) keywordConstant() {
+    panic("not implemented!")
 }
