@@ -54,9 +54,10 @@ func main() {
 func compile(filename string) {
 	next := tokenizer(filename)
 
-    compiler := newCompiler(next)
-    
-    // TODO: start here some how something
+	compiler := newCompiler(next)
+
+	// TODO: start here some how something
+	compiler.class()
 
 	newFileName := strings.TrimSuffix(filename, ".jack")
 	newFileName += "Tokens.xml"
@@ -114,13 +115,14 @@ func tokenizer(filename string) func() *Token {
 
 		switch currentToken {
 		case "/":
-			if code[i+1] == '/' {
+			switch code[i+1] {
+			case '/':
 				comment = C_ONE_LINE
 				currentToken = ""
-			} else if code[i+1] == '*' {
+			case '*':
 				comment = C_MULTI_LINE
 				currentToken = ""
-			} else {
+			default:
 				tokens = append(tokens, Token{typ: SYMBOL, value: currentToken})
 				currentToken = ""
 			}
