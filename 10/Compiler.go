@@ -1,7 +1,7 @@
 /*
 TODO:
 
-diff error main.xml, wrong skip somewhere? causing square.xml to fail
+square.jack to fail line 67 expected ; got -
 */
 
 package main
@@ -444,7 +444,7 @@ func (c *Compiler) term() {
 			c.useNextToken()
 		case "[":
 			if prevToken.typ == IDENTIFIER {
-				c.identifier()
+				c.xmlOutput += "<identifier> " + prevToken.value + " </identifier>\n"
 			} else {
 				panic("expected identifier")
 			}
@@ -500,6 +500,9 @@ func (c *Compiler) expressionList() {
 				break
 			} else if c.currentToken.value == "," {
 				c.xmlOutput += "<symbol> , </symbol>\n"
+			} else if c.currentToken.value == "(" {
+				c.expression()
+				continue
 			}
 			c.useNextToken()
 		} else {
@@ -511,8 +514,14 @@ func (c *Compiler) expressionList() {
 
 func (c *Compiler) op() {
 	switch c.currentToken.value {
-	case "+", "-", "*", "/", "&", "|", "<", ">", "=":
+	case "+", "-", "*", "/", "|", "=":
 		c.xmlOutput += "<symbol> " + c.currentToken.value + " </symbol>\n"
+	case "&":
+		c.xmlOutput += "<symbol> &amp; </symbol>\n"
+	case "<":
+		c.xmlOutput += "<symbol> &lt; </symbol>\n"
+	case ">":
+		c.xmlOutput += "<symbol> &gt; </symbol>\n"
 	default:
 		panic("expected op: '+', '-', '*', '/', '&', '|', '<', '>' or '='")
 	}
